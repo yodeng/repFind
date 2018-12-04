@@ -9,6 +9,7 @@ def rep_find(rdseq, max_rep_unit=100):
     max_rep_unit 为指定最大的重复单元碱基数
     返回  (左端重复单元，左端重复单元重复次数，右端重复单元，右端重复单元重复次数)
     '''
+    rdseq = rdseq.upper()
     length = len(rdseq)  
     left,right = {},{}
     for j in range(1,min(max_rep_unit+1,length/2+1)):

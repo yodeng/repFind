@@ -20,9 +20,9 @@ def rep_find(rdseq, max_rep_unit=100):
                 break
             rep[0] += s       
         else:                
-            left.setdefault(rep[0],j)
-            right.setdefault(rep[0],j)
-            continue
+            left[rep[0]] = j
+            right[rep[0]] = j
+            break
         for i in range(-j,-length,-j):            
             s = rdseq[i-j:i]
             if s != rdseq[-j:]:

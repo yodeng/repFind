@@ -4,7 +4,25 @@ import sys
 import os
 import argparse
 
-def rep_find(rdseq, max_rep_unit=100):
+def rep_find(seqstring,max_unit=6):
+    reg = re.compile(r'((.{1,%d}?)\2{1,})'%max_unit)
+    lmatch = reg.match(seqstring)    
+    if lmatch:
+        lseq,lunit = lmatch.group(1,2)
+        o1,o2 = lunit,len(lseq)/len(lunit)
+    else:
+        o1,o2 = seqstring[0],1
+    if len(seqstring) == len(lseq):
+        return o1,o2,o1,o2
+    rmatch = reg.match(seqstring[::-1])
+    if rmatch:
+        rseq,runit = rmatch.group(1,2)
+        o3,o4 = runit[::-1],len(rseq)/len(runit)
+    else:
+        o3,o4 = seqstring[-1],1
+    return o1,o2,o3,o4 
+
+def rep_find2(rdseq, max_rep_unit=100):
     '''
     max_rep_unit 为指定最大的重复单元碱基数
     返回  (左端重复单元，左端重复单元重复次数，右端重复单元，右端重复单元重复次数)

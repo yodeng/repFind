@@ -2,18 +2,18 @@
 #coding:utf-8
 import sys
 import os
+import re
 import argparse
 
-def rep_find(seqstring,max_unit=6):
-    reg = re.compile(r'((.{1,%d}?)\2{1,})'%max_unit)
+def rep_find(seqstring,reg):
     lmatch = reg.match(seqstring)    
     if lmatch:
         lseq,lunit = lmatch.group(1,2)
         o1,o2 = lunit,len(lseq)/len(lunit)
+        if len(seqstring) == len(lseq):
+            return o1,o2,o1,o2
     else:
         o1,o2 = seqstring[0],1
-    if len(seqstring) == len(lseq):
-        return o1,o2,o1,o2
     rmatch = reg.match(seqstring[::-1])
     if rmatch:
         rseq,runit = rmatch.group(1,2)
@@ -60,7 +60,7 @@ def rep_find2(rdseq, max_rep_unit=100):
     
 def parserArg():
     parser = argparse.ArgumentParser(description= "For finding the tendom repeats in both ends of you sequence.")  
-    parser.add_argument("-u","--unit",type=int,help="the length max repeat units, default: 100",metavar="int",default=100)
+    parser.add_argument("-u","--unit",type=int,help="the length max repeat units, default: auto-detect",metavar="int")
     parser.add_argument("seqfile",type=str,default=sys.stdin,help="the input seqfile or seqsting, only seq string include. default: sys.stdin")
     parser.add_argument("-o","--outfile",type=argparse.FileType("w"),default=sys.stdout,help="the output file, default: sys.stdout",metavar="outfile")
     args = parser.parse_args()
@@ -68,12 +68,16 @@ def parserArg():
     	         
 def main():
     args = parserArg()
+    if args.unit is None:
+        reg = re.compile(r'((.{1,}?)\2{1,})')
+    else:
+        reg = re.compile(r'((.{1,%d}?)\2{1,})'%args.unit)
     args.outfile.write("left_rep_seq\tleft_rep_unit\tleft_rep_num\tright_rep_seq\tright_rep_unit\tright_rep_num\n".upper())
     if os.path.isfile(args.seqfile):
       with open(args.seqfile) as fi:
        for line in fi:
         line = line.strip()
-        left,left_u,right,right_u = rep_find(line,args.unit)
+        left,left_u,right,right_u = rep_find(line,reg)
         if len(left)==1 and left_u==1 and len(right) == 1 and right_u==1:
             continue
         if len(left) > 1 or left_u > 1:
@@ -86,7 +90,7 @@ def main():
             args.outfile.write("-\t-\t-\n")            
     else:
         line = args.seqfile
-        left,left_u,right,right_u = rep_find(line,args.unit)
+        left,left_u,right,right_u = rep_find(line,reg)
         args.outfile.write(left*left_u + "\t" + left + "\t" + str(left_u) + "\t")
         args.outfile.write(right*right_u + "\t" + right + "\t" + str(right_u) + "\n")
         
